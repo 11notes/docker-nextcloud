@@ -1,5 +1,5 @@
 # ------ HEADER ------ #
-FROM nextcloud:13-apache
+FROM nextcloud:14-apache
 ARG DEBIAN_FRONTEND=noninteractive
 
 # ------ RUN  ------ #
@@ -21,6 +21,8 @@ RUN mkdir -p /usr/share/man/man1 \
     && pecl install imagick smbclient \
     && docker-php-ext-enable imagick smbclient \
     && mkdir /var/log/supervisord /var/run/supervisord
+
+ENV NEXTCLOUD_UPDATE=1
 
 ADD ./source/supervisord.conf /etc/supervisor/supervisord.conf
 ADD ./source/smb.conf /etc/samba/smb.conf
