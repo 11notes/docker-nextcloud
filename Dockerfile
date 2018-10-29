@@ -22,6 +22,8 @@ RUN mkdir -p /usr/share/man/man1 \
     && docker-php-ext-enable imagick smbclient \
     && mkdir /var/log/supervisord /var/run/supervisord
 
+ENV NEXTCLOUD_UPDATE=1
+
 ADD ./source/supervisord.conf /etc/supervisor/supervisord.conf
 ADD ./source/smb.conf /etc/samba/smb.conf
 
