@@ -1,5 +1,5 @@
 # ------ HEADER ------ #
-FROM nextcloud:15-apache
+FROM nextcloud:16-apache
 ARG DEBIAN_FRONTEND=noninteractive
 
 # ------ RUN  ------ #
