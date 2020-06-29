@@ -1,14 +1,20 @@
 # :: Header
-        FROM nextcloud:18-apache
+        FROM nextcloud:19.0.0-apache
         ARG DEBIAN_FRONTEND=noninteractive
 
 # :: Run
+        USER root
+
+        # :: modify smbclient for smb mount
         RUN apt-get update -y \
                 && apt-get install -y \
                         smbclient \
                         libsmbclient-dev \
-        && pecl install smbclient apcu \
-        && docker-php-ext-enable smbclient apcu
+        && pecl install smbclient \
+        && docker-php-ext-enable smbclient
+
+        # :: modify samba
+                ADD ./source/smb.conf /etc/samba/smb.conf
 
         # :: docker -u 1000:1000 (no root initiative)
                 RUN sed -i 's/:80/:8080/g' /etc/apache2/sites-available/000-default.conf \
