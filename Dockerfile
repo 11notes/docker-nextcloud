@@ -1,27 +1,49 @@
 # :: Header
-        FROM nextcloud:17.0.3-apache
-        ARG DEBIAN_FRONTEND=noninteractive
+        FROM nextcloud:21.0.0-fpm-alpine
+        ENV NEXTCLOUD_UPDATE=1
 
 # :: Run
         USER root
 
-        # :: modify smbclient for smb mount
-        RUN apt-get update -y \
-                && apt-get install -y \
-                        smbclient \
-                        libsmbclient-dev \
-        && pecl install smbclient \
-        && docker-php-ext-enable smbclient
+        RUN set -ex; \
+                apk add --no-cache \
+                        ffmpeg \
+                        imagemagick \
+                        procps \
+                        samba-client \
+                        supervisor;
 
-        # :: modify samba
-                ADD ./source/smb.conf /etc/samba/smb.conf
+        RUN set -ex; \
+                apk add --no-cache --virtual .build-deps \
+                        $PHPIZE_DEPS \
+                        imap-dev \
+                        krb5-dev \
+                        openssl-dev \
+                        samba-dev \
+                        bzip2-dev; \
+                docker-php-ext-configure imap --with-kerberos --with-imap-ssl; \
+                docker-php-ext-install \
+                        bz2 \
+                        imap; \
+                pecl install smbclient; \
+                docker-php-ext-enable smbclient; \
+                runDeps="$( \
+                        scanelf --needed --nobanner --format '%n#p' --recursive /usr/local/lib/php/extensions \
+                        | tr ',' '\n' \
+                        | sort -u \
+                        | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
+                )"; \
+                apk add --virtual .nextcloud-phpext-rundeps $runDeps; \
+                apk del .build-deps
+
+        RUN mkdir -p \
+                /var/log/supervisord \
+                /var/run/supervisord;
+
+        # :: copy root filesystem changes
+                COPY ./rootfs /
 
         # :: docker -u 1000:1000 (no root initiative)
-                RUN sed -i 's/:80/:8080/g' /etc/apache2/sites-available/000-default.conf \
-                        && sed -i 's/:443/:8443/g' /etc/apache2/sites-available/default-ssl.conf
-                RUN sed -i 's/Listen 80/Listen 8080/g' /etc/apache2/ports.conf \
-                        && sed -i 's/Listen 443/Listen 8443/g' /etc/apache2/ports.conf
-
                 RUN usermod -u 1000 www-data \
                         && groupmod -g 1000 www-data \
                         && chown -R www-data:www-data \
@@ -30,3 +52,4 @@
 
 # :: Start
         USER www-data
+        CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf"]
