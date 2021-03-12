@@ -11,10 +11,11 @@
                         imagemagick \
                         procps \
                         samba-client \
-                        supervisor;
+                        supervisor \
+                        shadow;
 
         RUN set -ex; \
-                apk add --no-cache --virtual .build-deps \
+                apk add --no-cache --virtual .build \
                         $PHPIZE_DEPS \
                         imap-dev \
                         krb5-dev \
@@ -34,7 +35,7 @@
                         | awk 'system("[ -e /usr/local/lib/" $1 " ]") == 0 { next } { print "so:" $1 }' \
                 )"; \
                 apk add --virtual .nextcloud-phpext-rundeps $runDeps; \
-                apk del .build-deps
+                apk del .build
 
         RUN mkdir -p \
                 /var/log/supervisord \
@@ -44,12 +45,19 @@
                 COPY ./rootfs /
 
         # :: docker -u 1000:1000 (no root initiative)
-                RUN usermod -u 1000 www-data \
-                        && groupmod -g 1000 www-data \
-                        && chown -R www-data:www-data \
+                RUN set -ex; \
+                        APP_UID="$(id -u www-data)"; \
+                        APP_GID="$(id -g www-data)"; \
+                        find / -not -path "/proc/*" -user $APP_UID -exec chown -h -R 1000:1000 {} \; ;\
+                        find / -not -path "/proc/*" -group $APP_GID -exec chown -h -R 1000:1000 {} \;  ;\
+                        usermod -u 1000 www-data; \
+                        groupmod -g 1000 www-data; \
+                        chown -R www-data:www-data \
                                 /var/www \
-                                /usr/local/etc/php/conf.d/
+                                /usr/local/etc/php/conf.d/ \
+                                /var/log/supervisord \
+                                /var/run/supervisord
 
 # :: Start
         USER www-data
-        CMD ["/usr/bin/supervisord", "-c", "/supervisord.conf"]
+        CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
