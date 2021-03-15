@@ -56,6 +56,7 @@
                         chown -R www-data:www-data \
                                 /var/www \
                                 /usr/local/etc/php/conf.d/ \
+                                /usr/local/etc/php-fpm.d/ \
                                 /var/log/supervisord \
                                 /var/run/supervisord \
                                 /usr/local/bin
