@@ -57,7 +57,8 @@
                                 /var/www \
                                 /usr/local/etc/php/conf.d/ \
                                 /var/log/supervisord \
-                                /var/run/supervisord
+                                /var/run/supervisord \
+                                /usr/local/bin
 
 # :: Start
         USER www-data

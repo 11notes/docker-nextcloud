@@ -1,4 +1,4 @@
-#/bin/ash
+#!/bin/ash
 
     #tuning
         DOCKER_PHP_CONFIG="/usr/local/etc/php-fpm.d/www.conf"
