@@ -43,6 +43,7 @@
 
         # :: copy root filesystem changes
                 COPY ./rootfs /
+                RUN chmod +x /usr/local/bin/*
 
         # :: docker -u 1000:1000 (no root initiative)
                 RUN set -ex; \
@@ -60,4 +61,5 @@
 
 # :: Start
         USER www-data
+        ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
         CMD ["/usr/bin/supervisord", "-c", "/etc/supervisord.conf"]
