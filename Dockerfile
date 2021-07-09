@@ -1,5 +1,5 @@
 # :: Header
-        FROM nextcloud:21.0.0-fpm-alpine
+        FROM nextcloud:22.0.0-fpm-alpine
         ENV NEXTCLOUD_UPDATE=1
 
 # :: Run
