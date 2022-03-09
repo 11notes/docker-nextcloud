@@ -3,8 +3,8 @@
         DOCKER_PHP_CONFIG="/usr/local/etc/php-fpm.d/www.conf"
         DOCKER_PHP_OPCACHE="/usr/local/etc/php/conf.d/opcache-recommended.ini"
 
-        DOCKER_PHP_OPCACHE_MAX_MEMORY=$(awk '/MemFree/ { printf "%.0f \n", $2/1024*0.25 }' /proc/meminfo) # 25% memory for OPCACHE
-        DOCKER_PHP_MAX_CHILDREN=$(awk '/MemFree/ { printf "%.0f \n", $2/1024*0.75/64 }' /proc/meminfo) # 75% memory for PHP Processes
+        DOCKER_PHP_OPCACHE_MAX_MEMORY=$(awk '/MemAvailable/ { printf "%.0f \n", $2/1024*0.25 }' /proc/meminfo) # 25% memory for OPCACHE
+        DOCKER_PHP_MAX_CHILDREN=$(awk '/MemAvailable/ { printf "%.0f \n", $2/1024*0.75/64 }' /proc/meminfo) # 75% memory for PHP Processes
         DOCKER_PHP_MAX_SERVERS="$(nproc --all 7 | awk '{ SUM += $1*4} END { print SUM }')"
         DOCKER_PHP_MIN_SERVERS="$(nproc --all 7 | awk '{ SUM += $1*2} END { print SUM }')"
         DOCKER_PHP_MAX_REQUESTS="10000"
